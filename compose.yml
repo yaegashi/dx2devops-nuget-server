@@ -1,0 +1,34 @@
+version: "3"
+services:
+  init:
+    image: busybox
+    command:
+      - sh
+      - -c
+      - mkdir -p /data/ebap/accounts /data/bagetter/packages
+    volumes:
+      - ./data:/data
+  ebap:
+    depends_on: { init: { condition: service_completed_successfully } }
+    image: ghcr.io/yaegashi/easy-basic-auth-proxy
+    ports:
+      - "8080:80"
+    environment:
+      EBAP_LISTEN: :80
+      EBAP_TARGET_URL: http://bagetter:8080
+      EBAP_ACCOUNTS_DIR: /data/ebap/accounts
+    volumes:
+      - ./data:/data
+  bagetter:
+    depends_on: { init: { condition: service_completed_successfully } }
+    image: bagetter/bagetter
+    environment:
+      # Reference: https://www.bagetter.com/docs/Installation/docker
+      ApiKey: secret
+      Storage__Type: FileSystem
+      Storage__Path: /data/bagetter/packages
+      Database__Type: Sqlite
+      Database__ConnectionString: Data Source=/data/bagetter/bagetter.db
+      Search__Type: Database
+    volumes:
+      - ./data:/data
