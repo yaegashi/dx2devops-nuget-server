@@ -12,10 +12,17 @@ These credentials allow users to access the server using generic NuGet V3 API cl
 
 ## Solution overview
 
-This solution comprises the following containerized components:
+This solution includes the following components:
 
-- [BaGetter](https://github.com/bagetter/BaGetter)
-- [easy-basic-auth-proxy](https://github.com/yaegashi/easy-basic-auth-proxy)
+- Azure container app with multiple containers, max replica count of 1:
+  - [BaGetter](https://github.com/bagetter/BaGetter)
+  - [easy-basic-auth-proxy](https://github.com/yaegashi/easy-basic-auth-proxy)
+- Azure Files share for persistent volumes of the container app
+- Azure Key Vault for secret strings for the container app including the BaGetter API key
+- Microsoft Entra ID for the built-in authentication of the cotainer app (Easy Auth)
+- Azure Database for PostgreSQL flexible server
+
+> ![](doc/assets/solution-diagram.png)
 
 The following endpoints are available on a single web server:
 
@@ -26,6 +33,8 @@ The following endpoints are available on a single web server:
 |`/auth`|easy-basic-auth-proxy|Configuration for Easy Basic Auth Proxy|
 |`/auth/debug`|easy-basic-auth-proxy|Dump request headers for debugging|
 |`/.auth/login/aad`|Easy Auth|Login via Easy Auth (Microsoft Entra ID)|
+
+> ![](doc/assets/path-routing.png)
 
 The locations for persistent data storage are as follows:
 
@@ -90,23 +99,21 @@ After provisioning, you will need to configure the container app in the Azure Po
 enable the built-in authentication.
     - Select **Microsoft** as the **Identity provider** (Microsoft Entra ID)
     - Enable **Allow unauthenticated access** in the **Restrict access** options
-    > ![](assets/easyauth-config.png)
+    > ![](doc/assets/easyauth-config.png)
 3. (Optional) Configure [the authConfigs resource](https://learn.microsoft.com/en-us/azure/templates/microsoft.app/containerapps/authconfigs)
 to grant access only to specific user groups.
 4. (Optional) Configure [the custom domain](https://learn.microsoft.com/en-us/azure/container-apps/custom-domains-managed-certificates) on the website.
 
 ## Access the BaGetter website
 
-1. Navigate to the Easy Basic Auth Proxy configuration link.
-Sign in with Microsoft Entra ID (Easy Auth).
-2. Retrieve your username/password credentials for Basic authentication from this configuration.
-    - Click the `Generate new password` button to create a new password.
-    - Click the `Open website in new tab` button to launch the BaGetter website.
-    > ![](assets/ebap-config.png)
-3. The BaGetter website will prompt you to enter your username/passowrd for Basic authentication.
-Copy and paste your credentials from the configuration.
-4. After entering your credentials, you will be granted access to the BaGetter website.
-    > ![](assets/bagetter.png)
+1. Navigate to the BaGetter website link.  You will be prompted for Basic Auth credentials.  Simply click **Cancel** at this stage.
+    > ![](doc/assets/ebap-basic-auth.png)
+2. You will see the Easy Basic Auth Proxy blank page.  Click **Sign in** button.  This will redirect you to the Microsoft website where you can sign in with your ME-ID account.
+    > ![](doc/assets/ebap-blank.png)
+3. Once authenticated, you will be redirected to the Easy Basic Auth Proxy configuration.  Click the **Open website in new tab** button.
+    > ![](doc/assets/ebap-config.png)
+4. You should now be able to see the BaGetter website.
+    > ![](doc/assets/bagetter-top.png)
 
 ## Access the NuGet feed with V3 API clients
 
