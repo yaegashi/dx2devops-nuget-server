@@ -21,6 +21,9 @@ param dbUser string = 'packages'
 @secure()
 param dbPass string
 
+@secure()
+param sessionKey string
+
 param resourceGroupName string = ''
 
 param keyVaultName string = ''
@@ -87,6 +90,16 @@ module keyVaultSecretDbPass './core/security/keyvault-secret.bicep' = {
   }
 }
 
+module keyvaultSecretSessionKey './core/security/keyvault-secret.bicep' = {
+  name: 'keyVaultSecretSessionKey'
+  scope: rg
+  params: {
+    keyVaultName: keyVault.outputs.name
+    name: 'sessionKey'
+    secretValue: sessionKey
+    tags: tags
+  }
+}
 module storageAccount './core/storage/storage-account.bicep' = {
   name: 'storageAccount'
   scope: rg
@@ -156,6 +169,7 @@ module app './app/apps.bicep' = {
     databaseName: psql.outputs.name
     databaseConnectionString: 'Host=${psql.outputs.POSTGRES_DOMAIN_NAME};Port=5432;Database=${dbName};Username=${dbUser};Password=${dbPass};SSL Mode=Require'
     apiKey: apiKey
+    sessionKey: sessionKey
   }
 }
 

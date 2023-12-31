@@ -9,6 +9,8 @@ param databaseName string
 param databaseConnectionString string
 @secure()
 param apiKey string
+@secure()
+param sessionKey string
 
 resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2022-12-01' existing = {
   name: databaseName
@@ -75,6 +77,7 @@ resource app 'Microsoft.App/containerApps@2023-04-01-preview' = {
             { name: 'EBAP_LISTEN', value: ':80' }
             { name: 'EBAP_TARGET_URL', value: 'http://localhost:8080' }
             { name: 'EBAP_ACCOUNTS_DIR', value: '/data/ebap/accounts' }
+            { name: 'EBAP_SESSION_KEY', value: sessionKey }
           ]
           volumeMounts: [
             {

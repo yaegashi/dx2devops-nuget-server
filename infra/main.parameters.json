@@ -16,6 +16,9 @@
     },
     "dbPass": {
       "value": "$(secretOrRandomPassword ${AZURE_KEY_VAULT_NAME} dbPass)"
+    },
+    "sessionKey": {
+      "value": "$(secretOrRandomPassword ${AZURE_KEY_VAULT_NAME} sessionKey)"
     }
   }
 }
